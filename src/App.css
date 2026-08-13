@@ -161,4 +161,54 @@ body {
 .input-area button:disabled {
   background: #b0d4ff;
   cursor: not-allowed;
+
+.fade-in {
+  animation: fadeSlideIn 0.25s ease-out;
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 16px 12px;
+}
+
+.suggestion-chip {
+  background: #f0f0f3;
+  border: 1px solid #e5e5ea;
+  color: #007aff;
+  border-radius: 16px;
+  padding: 8px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.suggestion-chip:hover {
+  background: #e5f1ff;
+}
+
+@media (max-width: 520px) {
+  .chat-container {
+    height: 100vh;
+    border-radius: 0;
+    max-width: 100%;
+  }
+
+  .app-shell {
+    padding: 0;
+  }
+}
+
 }

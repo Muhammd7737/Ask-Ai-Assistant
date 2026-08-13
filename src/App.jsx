@@ -1,6 +1,12 @@
 import { useState, useRef, useEffect } from "react";
 import "./App.css";
 
+const SUGGESTIONS = [
+  "What's my top spending category?",
+  "How much have I spent this month?",
+  "What's my biggest expense?",
+];
+
 function App() {
   const [messages, setMessages] = useState([
     { sender: "bot", text: "Ask me anything about your spending!" },
@@ -8,15 +14,16 @@ function App() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
+  const inputRef = useRef(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
-  async function handleSend() {
-    if (input.trim() === "") return;
+  async function sendMessage(text) {
+    if (text.trim() === "" || loading) return;
 
-    const userMessage = { sender: "user", text: input };
+    const userMessage = { sender: "user", text };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setLoading(true);
@@ -26,7 +33,7 @@ function App() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ question: input }),
+        body: JSON.stringify({ question: text }),
       });
 
       const data = await response.json();
@@ -40,14 +47,21 @@ function App() {
       ]);
     } finally {
       setLoading(false);
+      inputRef.current?.focus();
     }
   }
 
+  function handleSend() {
+    sendMessage(input);
+  }
+
   function handleKeyDown(e) {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && !loading) {
       handleSend();
     }
   }
+
+  const showSuggestions = messages.length === 1 && !loading;
 
   return (
     <div className="app-shell">
@@ -62,13 +76,13 @@ function App() {
 
         <div className="messages">
           {messages.map((msg, index) => (
-            <div key={index} className={`message-row ${msg.sender}`}>
+            <div key={index} className={`message-row ${msg.sender} fade-in`}>
               <div className={`message ${msg.sender}`}>{msg.text}</div>
             </div>
           ))}
 
           {loading && (
-            <div className="message-row bot">
+            <div className="message-row bot fade-in">
               <div className="message bot typing">
                 <span className="dot"></span>
                 <span className="dot"></span>
@@ -80,13 +94,25 @@ function App() {
           <div ref={messagesEndRef} />
         </div>
 
+        {showSuggestions && (
+          <div className="suggestions">
+            {SUGGESTIONS.map((s) => (
+              <button key={s} className="suggestion-chip" onClick={() => sendMessage(s)}>
+                {s}
+              </button>
+            ))}
+          </div>
+        )}
+
         <div className="input-area">
           <input
+            ref={inputRef}
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Ask about your spending..."
+            disabled={loading}
           />
           <button onClick={handleSend} disabled={loading}>
             Send
