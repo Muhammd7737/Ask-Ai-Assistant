@@ -1,48 +1,51 @@
-import { useState, useRef, useEffect } from 'react'
-import './App.css'
+import { useState, useRef, useEffect } from "react";
+import "./App.css";
 
 function App() {
   const [messages, setMessages] = useState([
-    { sender: 'bot', text: 'Ask me anything about your spending!' }
-  ])
-  const [input, setInput] = useState('')
-  const [loading, setLoading] = useState(false)
-  const messagesEndRef = useRef(null)
+    { sender: "bot", text: "Ask me anything about your spending!" },
+  ]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages, loading])
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, loading]);
 
   async function handleSend() {
-    if (input.trim() === '') return
+    if (input.trim() === "") return;
 
-    const userMessage = { sender: 'user', text: input }
-    setMessages(prev => [...prev, userMessage])
-    setInput('')
-    setLoading(true)
+    const userMessage = { sender: "user", text: input };
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+    setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:2030/ask', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ question: input })
-      })
+      const response = await fetch("https://pocketpal-yaj9.onrender.com/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ question: input }),
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
-      setMessages(prev => [...prev, { sender: 'bot', text: data.answer }])
+      setMessages((prev) => [...prev, { sender: "bot", text: data.answer }]);
     } catch (error) {
-      console.error('Error talking to backend:', error)
-      setMessages(prev => [...prev, { sender: 'bot', text: 'Something went wrong connecting to the server.' }])
+      console.error("Error talking to backend:", error);
+      setMessages((prev) => [
+        ...prev,
+        { sender: "bot", text: "Something went wrong connecting to the server." },
+      ]);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   function handleKeyDown(e) {
-    if (e.key === 'Enter') {
-      handleSend()
+    if (e.key === "Enter") {
+      handleSend();
     }
   }
 
@@ -60,9 +63,7 @@ function App() {
         <div className="messages">
           {messages.map((msg, index) => (
             <div key={index} className={`message-row ${msg.sender}`}>
-              <div className={`message ${msg.sender}`}>
-                {msg.text}
-              </div>
+              <div className={`message ${msg.sender}`}>{msg.text}</div>
             </div>
           ))}
 
@@ -93,7 +94,7 @@ function App() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
