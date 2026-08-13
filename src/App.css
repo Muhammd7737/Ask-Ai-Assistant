@@ -118,12 +118,24 @@ body {
   animation: blink 1.4s infinite both;
 }
 
-.dot:nth-child(2) { animation-delay: 0.2s; }
-.dot:nth-child(3) { animation-delay: 0.4s; }
+.dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
 
 @keyframes blink {
-  0%, 80%, 100% { opacity: 0.3; }
-  40% { opacity: 1; }
+  0%,
+  80%,
+  100% {
+    opacity: 0.3;
+  }
+
+  40% {
+    opacity: 1;
+  }
 }
 
 .input-area {
@@ -161,6 +173,7 @@ body {
 .input-area button:disabled {
   background: #b0d4ff;
   cursor: not-allowed;
+}
 
 .fade-in {
   animation: fadeSlideIn 0.25s ease-out;
@@ -171,6 +184,7 @@ body {
     opacity: 0;
     transform: translateY(6px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -209,6 +223,4 @@ body {
   .app-shell {
     padding: 0;
   }
-}
-
 }
