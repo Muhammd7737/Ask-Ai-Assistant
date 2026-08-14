@@ -224,3 +224,52 @@ body {
     padding: 0;
   }
 }
+
+.login-container {
+  height: auto;
+  padding-bottom: 24px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px 20px;
+}
+
+.login-form input {
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #d1d1d6;
+  font-size: 14px;
+  outline: none;
+}
+
+.login-form input:focus {
+  border-color: #007aff;
+}
+
+.login-form button {
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: #007aff;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.login-error {
+  color: #ff3b30;
+  font-size: 13px;
+}
+
+.logout-button {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: #007aff;
+  font-size: 13px;
+  cursor: pointer;
+}

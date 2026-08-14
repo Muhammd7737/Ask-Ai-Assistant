@@ -8,6 +8,11 @@ const SUGGESTIONS = [
 ];
 
 function App() {
+  const [token, setToken] = useState(localStorage.getItem("pocketpal_token"));
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
+
   const [messages, setMessages] = useState([
     { sender: "bot", text: "Ask me anything about your spending!" },
   ]);
@@ -20,6 +25,37 @@ function App() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
+  async function handleLogin(e) {
+    e.preventDefault();
+    setLoginError("");
+
+    try {
+      const response = await fetch("https://pocketpal-yaj9.onrender.com/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setLoginError(data.error || "Login failed");
+        return;
+      }
+
+      localStorage.setItem("pocketpal_token", data.token);
+      setToken(data.token);
+    } catch (error) {
+      setLoginError("Something went wrong connecting to the server.");
+    }
+  }
+
+  function handleLogout() {
+    localStorage.removeItem("pocketpal_token");
+    setToken(null);
+    setMessages([{ sender: "bot", text: "Ask me anything about your spending!" }]);
+  }
+
   async function sendMessage(text) {
     if (text.trim() === "" || loading) return;
 
@@ -31,12 +67,20 @@ function App() {
     try {
       const response = await fetch("https://pocketpal-yaj9.onrender.com/ask", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ question: text }),
       });
 
       const data = await response.json();
+
+      if (response.status === 401) {
+        handleLogout();
+        setMessages((prev) => [...prev, { sender: "bot", text: "Your session expired. Please log in again." }]);
+        return;
+      }
 
       setMessages((prev) => [...prev, { sender: "bot", text: data.answer }]);
     } catch (error) {
@@ -63,6 +107,39 @@ function App() {
 
   const showSuggestions = messages.length === 1 && !loading;
 
+  if (!token) {
+    return (
+      <div className="app-shell">
+        <div className="chat-container login-container">
+          <div className="chat-header">
+            <div className="chat-header-icon">$</div>
+            <div>
+              <div className="chat-header-title">Spending Assistant</div>
+              <div className="chat-header-subtitle">Log in with your PocketPal account</div>
+            </div>
+          </div>
+
+          <form className="login-form" onSubmit={handleLogin}>
+            <input
+              type="text"
+              placeholder="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            {loginError && <div className="login-error">{loginError}</div>}
+            <button type="submit">Log In</button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="app-shell">
       <div className="chat-container">
@@ -72,6 +149,7 @@ function App() {
             <div className="chat-header-title">Spending Assistant</div>
             <div className="chat-header-subtitle">Ask about your PocketPal data</div>
           </div>
+          <button className="logout-button" onClick={handleLogout}>Log out</button>
         </div>
 
         <div className="messages">
