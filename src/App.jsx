@@ -5,7 +5,6 @@ import "./App.css";
 async function fetchWithRetry(url, options, retries = 4, delayMs = 8000) {
   try {
     const response = await fetch(url, options);
-    // Fixed: changed bitwise '&' to logical '&&'
     if (!response.ok && response.status >= 500) {
       throw new Error(`Server starting up (Status: ${response.status})`);
     }
@@ -27,8 +26,8 @@ const SUGGESTIONS = [
 ];
 
 function App() {
-  const [token, setToken] = useState(localStorage.getItem("pocketpal_token"));
   const [loginLoading, setLoginloading] = useState(false);
+  const [token, setToken] = useState(localStorage.getItem("pocketpal_token"));
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
