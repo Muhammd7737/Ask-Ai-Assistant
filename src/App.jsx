@@ -1,11 +1,31 @@
 import { useState, useRef, useEffect } from "react";
 import "./App.css";
 
+// Helper function to fetch with retries and timeout
+async function fetchWithTimeout(url, options, retries = 4, delayMs = 8000) {
+  try {
+    const response = await fetch(url, options);
+    if (!response.ok & response.status >= 500) {
+      throw new Error(`Server starting up (Status: ${response.status})`);
+    }
+    return response;
+  } catch (error) {
+    if (retries > 0) {
+      console.log('Server sleeping or booting up. Retrying in ${delayMS / 1000 seconds... (${retries} retries left)');
+      await new Promise(resolve => setTimeout(resolve, delayMs));
+      return fetchWithTimeout(url, options, retries - 1, delayMs);
+    }
+    throw error;
+  }
+}
+
 const SUGGESTIONS = [
   "What's my top spending category?",
   "How much have I spent this month?",
   "What's my biggest expense?",
 ];
+
+const [loginLoading, setLoginloading] = useState(false);
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem("pocketpal_token"));
@@ -28,9 +48,11 @@ function App() {
   async function handleLogin(e) {
     e.preventDefault();
     setLoginError("");
+    setLoginLoading(true);
+    setLoginError("Connecting... this can take up to a minute if the server was asleep.");
 
     try {
-      const response = await fetch("https://pocketpal-yaj9.onrender.com/api/login", {
+      const response = await fetchWithRetry("https://pocketpal-yaj9.onrender.com/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -40,13 +62,16 @@ function App() {
 
       if (!response.ok) {
         setLoginError(data.error || "Login failed");
+        setLoginLoading(false);
         return;
       }
 
       localStorage.setItem("pocketpal_token", data.token);
       setToken(data.token);
     } catch (error) {
-      setLoginError("Something went wrong connecting to the server.");
+      setLoginError("Could not reach the server. Please try again in a moment.");
+    } finally {
+      setLoginLoading(false);
     }
   }
 
@@ -65,7 +90,7 @@ function App() {
     setLoading(true);
 
     try {
-      const response = await fetch("https://pocketpal-yaj9.onrender.com/ask", {
+      const response = await fetchWithRetry("https://pocketpal-yaj9.onrender.com/ask", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
