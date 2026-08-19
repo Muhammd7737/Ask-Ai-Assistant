@@ -26,7 +26,7 @@ const SUGGESTIONS = [
 ];
 
 function App() {
-  const [loginLoading, setLoginloading] = useState(false);
+  const [loginLoading, setLoginLoading] = useState(false);
   const [token, setToken] = useState(localStorage.getItem("pocketpal_token"));
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
