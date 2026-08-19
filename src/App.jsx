@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import "./App.css";
 
 // Helper function to fetch with retries and timeout
-async function fetchWithRetry(url, options, retries = 4, delayMs = 8000) {
+async function fetchWithRetry(url, options, retries = 6, delayMs = 7000) {
   try {
     const response = await fetch(url, options);
     if (!response.ok && response.status >= 500) {
@@ -11,7 +11,7 @@ async function fetchWithRetry(url, options, retries = 4, delayMs = 8000) {
     return response;
   } catch (error) {
     if (retries > 0) {
-      console.log(`Server sleeping or booting up. Retrying in ${delayMs / 1000} seconds... (${retries} retries left)`);
+      console.log(`Server booting up. Retrying in ${delayMs / 1000}s... (${retries} left)`);
       await new Promise(resolve => setTimeout(resolve, delayMs));
       return fetchWithRetry(url, options, retries - 1, delayMs);
     }
