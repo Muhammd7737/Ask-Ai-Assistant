@@ -2,18 +2,19 @@ import { useState, useRef, useEffect } from "react";
 import "./App.css";
 
 // Helper function to fetch with retries and timeout
-async function fetchWithTimeout(url, options, retries = 4, delayMs = 8000) {
+async function fetchWithRetry(url, options, retries = 4, delayMs = 8000) {
   try {
     const response = await fetch(url, options);
-    if (!response.ok & response.status >= 500) {
+    // Fixed: changed bitwise '&' to logical '&&'
+    if (!response.ok && response.status >= 500) {
       throw new Error(`Server starting up (Status: ${response.status})`);
     }
     return response;
   } catch (error) {
     if (retries > 0) {
-      console.log('Server sleeping or booting up. Retrying in ${delayMS / 1000 seconds... (${retries} retries left)');
+      console.log(`Server sleeping or booting up. Retrying in ${delayMs / 1000} seconds... (${retries} retries left)`);
       await new Promise(resolve => setTimeout(resolve, delayMs));
-      return fetchWithTimeout(url, options, retries - 1, delayMs);
+      return fetchWithRetry(url, options, retries - 1, delayMs);
     }
     throw error;
   }
@@ -25,10 +26,9 @@ const SUGGESTIONS = [
   "What's my biggest expense?",
 ];
 
-const [loginLoading, setLoginloading] = useState(false);
-
 function App() {
   const [token, setToken] = useState(localStorage.getItem("pocketpal_token"));
+  const [loginLoading, setLoginloading] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
