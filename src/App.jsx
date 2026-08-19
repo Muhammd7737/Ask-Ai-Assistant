@@ -48,7 +48,6 @@ function App() {
     e.preventDefault();
     setLoginError("");
     setLoginLoading(true);
-    setLoginError("Connecting... this can take up to a minute if the server was asleep.");
 
     try {
       const response = await fetchWithRetry("https://pocketpal-yaj9.onrender.com/api/login", {
@@ -61,7 +60,6 @@ function App() {
 
       if (!response.ok) {
         setLoginError(data.error || "Login failed");
-        setLoginLoading(false);
         return;
       }
 
@@ -149,15 +147,26 @@ function App() {
               placeholder="Username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+              disabled={loginLoading}
             />
             <input
               type="password"
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              disabled={loginLoading}
             />
-            {loginError && <div className="login-error">{loginError}</div>}
-            <button type="submit">Log In</button>
+            {loginLoading && (
+              <div className="login-error" style={{ color: "#666" }}>
+                Connecting to server... (may take ~40s if waking up)
+              </div>
+            )}
+            {loginError && !loginLoading && (
+              <div className="login-error">{loginError}</div>
+            )}
+            <button type="submit" disabled={loginLoading}>
+              {loginLoading ? "Logging in..." : "Log In"}
+            </button>
           </form>
         </div>
       </div>
